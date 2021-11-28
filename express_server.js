@@ -27,7 +27,9 @@ function generateRandomString() {
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
-app.get("/", (req, res) => res.send("Hello!"));
+
+//Directs root page to urls
+app.get("/", (req, res) => res.redirect(`/urls`));
 
 //Shows all URL's in the database
 app.get("/urls", (req, res) => {
@@ -49,6 +51,12 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
+});
+
+//Delete URL from Database
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
 });
 
 //Redirect to longURL
