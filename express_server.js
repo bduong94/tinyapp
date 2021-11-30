@@ -58,6 +58,11 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//Shows registration page
+app.get("/register", (req, res) =>{
+  res.render("urls_registration");
+});
+
 //Delete URL from Database
 app.post("/urls/:shortURL", (req, res) => {
   delete urlDatabase[req.params.shortURL];
@@ -87,6 +92,7 @@ app.post("/logout", (req, res) => {
   res.cookie('username');
   res.redirect("/urls");
 });
+
 
 app.get("/urls.json", (req, res) => res.json(urlDatabase));
 app.get("/hello", (req, res) => res.send("<html><body>Hello <b>World</b></body></html>\n"));
