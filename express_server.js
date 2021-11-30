@@ -84,7 +84,8 @@ app.post("/login", (req, res) => {
 
 //Logout user
 app.post("/logout", (req, res) => {
-  
+  res.cookie('username');
+  res.redirect("/urls");
 });
 
 app.get("/urls.json", (req, res) => res.json(urlDatabase));
