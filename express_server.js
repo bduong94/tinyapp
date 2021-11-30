@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const app = express();
+app.use(cookieParser());
 const PORT = 8080;
 let urlLength = 6;
 
@@ -33,12 +35,15 @@ app.get("/", (req, res) => res.redirect(`/urls`));
 
 //Shows all URL's in the database
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
   res.render("urls_index", templateVars);
 });
 
 //Shows form to create new URL
-app.get("/urls/new", (req, res) => res.render("urls_new"));
+app.get("/urls/new", (req, res) => {
+  const templateVars = { username: req.cookies['username'] };
+  res.render("urls_new", templateVars);
+});
 
 //Creates new shortURL and adds to database
 app.post("/urls", (req, res) => {
@@ -49,7 +54,7 @@ app.post("/urls", (req, res) => {
 
 //Shows all short URLS
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username']};
   res.render("urls_show", templateVars);
 });
 
