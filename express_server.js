@@ -76,9 +76,15 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(urlDatabase[req.params.shortURL]);
 });
 
+//Login user
 app.post("/login", (req, res) => {
   res.cookie('username', req.body['username']);
   res.redirect("/urls");
+});
+
+//Logout user
+app.post("/logout", (req, res) => {
+  
 });
 
 app.get("/urls.json", (req, res) => res.json(urlDatabase));
