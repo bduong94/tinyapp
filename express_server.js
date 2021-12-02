@@ -6,11 +6,6 @@ app.use(cookieParser());
 const PORT = 8080;
 let urlLength = 6;
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
-
 //Create shortURL string
 function generateRandomString() {
   let result = "";
@@ -27,6 +22,17 @@ function generateRandomString() {
   return result;
 }
 
+//Object to store all URLs
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+
+//Object to store all Users
+const users = {
+  
+};
+
 //bodyParser
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -42,19 +48,19 @@ app.get("/", (req, res) => res.redirect(`/urls`));
 
 //Shows all URL's in the database
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
+  const templateVars = { urls: urlDatabase, user_id: users[req.cookies['user_id']] };
   res.render("urls_index", templateVars);
 });
 
 //Shows form to create new URL
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies['username'] };
+  const templateVars = { user_id: users[req.cookies['user_id']] };
   res.render("urls_new", templateVars);
 });
 
 //Shows all short URLS
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username']};
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_id: users[req.cookies['user_id']]};
   res.render("urls_show", templateVars);
 });
 
@@ -97,9 +103,16 @@ app.post("/login", (req, res) => {
 
 //Logout user
 app.post("/logout", (req, res) => {
-  res.cookie('username');
+  res.clearCookie('username');
   res.redirect("/urls");
 });
 
+//Register a user
+app.post("/register", (req, res) => {
+  let userID = generateRandomString();
+  users[userID] = { id: userID, email: req.body['userEmail'], password: req.body['userPassword'] };
+  res.cookie('user_id', userID);
+  res.redirect("/urls");
+});
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
