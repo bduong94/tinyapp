@@ -27,8 +27,15 @@ function generateRandomString() {
   return result;
 }
 
-app.set('view engine', 'ejs');
+//bodyParser
 app.use(bodyParser.urlencoded({extended: true}));
+
+//-----SET----
+app.set('view engine', 'ejs');
+
+//-----GET-----
+//Creates json for urlDatabase
+app.get("/urls.json", (req, res) => res.json(urlDatabase));
 
 //Directs root page to urls
 app.get("/", (req, res) => res.redirect(`/urls`));
@@ -45,13 +52,6 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-//Creates new shortURL and adds to database
-app.post("/urls", (req, res) => {
-  let randomString = generateRandomString();
-  urlDatabase[randomString] = req.body['longURL'];
-  res.redirect(`/urls/${randomString}`);
-});
-
 //Shows all short URLS
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username']};
@@ -61,6 +61,19 @@ app.get("/urls/:shortURL", (req, res) => {
 //Shows registration page
 app.get("/register", (req, res) =>{
   res.render("urls_registration");
+});
+
+//Redirect to longURL
+app.get("/u/:shortURL", (req, res) => {
+  res.redirect(urlDatabase[req.params.shortURL]);
+});
+
+//-----POST-----
+//Creates new shortURL and adds to database
+app.post("/urls", (req, res) => {
+  let randomString = generateRandomString();
+  urlDatabase[randomString] = req.body['longURL'];
+  res.redirect(`/urls/${randomString}`);
 });
 
 //Delete URL from Database
@@ -76,11 +89,6 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   res.redirect("/urls");
 });
 
-//Redirect to longURL
-app.get("/u/:shortURL", (req, res) => {
-  res.redirect(urlDatabase[req.params.shortURL]);
-});
-
 //Login user
 app.post("/login", (req, res) => {
   res.cookie('username', req.body['username']);
@@ -93,8 +101,5 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-
-app.get("/urls.json", (req, res) => res.json(urlDatabase));
-app.get("/hello", (req, res) => res.send("<html><body>Hello <b>World</b></body></html>\n"));
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
