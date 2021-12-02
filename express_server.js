@@ -79,7 +79,14 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //Shows registration page
 app.get("/register", (req, res) =>{
-  res.render("urls_registration");
+  const templateVars = { user_id: users[req.cookies['user_id']] };
+  res.render("urls_registration", templateVars);
+});
+
+//Shows login page
+app.get("/login", (req, res) =>{
+  const templateVars = { user_id: users[req.cookies['user_id']] };
+  res.render("urls_login", templateVars);
 });
 
 //Redirect to longURL

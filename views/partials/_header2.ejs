@@ -11,4 +11,21 @@
       </div>
     </div>
   </nav>
+  <div class = "d-flex flex-row justify-content-center align-items-center">
+    <% if(user_id && user_id['email']){ %>
+      <div class="p-6 mr-2">
+        <strong>Logged In As: <%= user_id['email'] %>!</strong>
+      </div>
+      <div class="p-6">
+        <form action="/logout" method="POST">
+          <button class="btn btn-outline-dark" type="submit">Logout</button>
+        </form>
+      </div>
+    <% } else { %>
+      <form action="/login" method="POST">
+          <input type="text" name="username" placeholder="Username">
+          <button class="btn btn-outline-dark" type="submit">Login</button>
+      </form>
+    <% } %>
+  </div>
 </header>
