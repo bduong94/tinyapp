@@ -25,8 +25,28 @@ function generateRandomString() {
 //Check email
 function checkEmail(email) {
   for (let user in users) {
-    if (users[user]['email'] = email) {
+    if (users[user]['email'] === email) {
       return true;
+    }
+  }
+
+  return false;
+}
+
+//Check user credentials
+function checkPassword(email, password) {
+  for (let user in users) {
+    if (users[user]["password"] !== password) {
+      return true;
+    }
+  }
+}
+
+//Check email
+function findUserID(email) {
+  for (let user in users) {
+    if (users[user]['email'] = email) {
+      return user;
     }
   }
 }
@@ -110,20 +130,33 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //Edit longURL in Database
 app.post("/urls/:shortURL/edit", (req, res) => {
-  console.log(req.body['newURL']);
   urlDatabase[req.params.shortURL] = req.body['newURL'];
   res.redirect("/urls");
 });
 
 //Login user
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body['username']);
+  if (req.body['userEmail'] === "" || req.body['userPassword'] === "") {
+    return res.status(400).send("Sorry, email or password cannot be empty!");
+  }
+
+  if (!checkEmail(req.body['userEmail'])) {
+    return res.status(403).send('Email is not in the database');
+  }
+
+  if (checkPassword(req.body['userEmail'], req.body['userPassword'])) {
+    return res.status(403).send('Password does not match');
+  }
+
+  let userID = findUserID(req.body['userEmail']);
+
+  res.cookie('user_id', userID);
   res.redirect("/urls");
 });
 
 //Logout user
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect("/urls");
 });
 
@@ -132,6 +165,7 @@ app.post("/register", (req, res) => {
   if (req.body['userEmail'] === "" || req.body['userPassword'] === "") {
     return res.status(400).send("Sorry, email or password cannot be empty!");
   }
+
   if (checkEmail(req.body['userEmail'])) {
     return res.status(400).send("Sorry, that email is already in use.");
   }
