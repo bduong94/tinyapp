@@ -22,6 +22,15 @@ function generateRandomString() {
   return result;
 }
 
+//Check email
+function checkEmail(email) {
+  for (let user in users) {
+    if (users[user]['email'] = email) {
+      return true;
+    }
+  }
+}
+
 //Object to store all URLs
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -30,7 +39,11 @@ const urlDatabase = {
 
 //Object to store all Users
 const users = {
-  
+  "kImfn": {
+    id: "kImfn",
+    email: "brian@gmail.com",
+    password: "test123"
+  }
 };
 
 //bodyParser
@@ -109,6 +122,12 @@ app.post("/logout", (req, res) => {
 
 //Register a user
 app.post("/register", (req, res) => {
+  if (req.body['userEmail'] === "" || req.body['userPassword'] === "") {
+    return res.status(400).send("Sorry, email or password cannot be empty!");
+  }
+  if (checkEmail(req.body['userEmail'])) {
+    return res.status(400).send("Sorry, that email is already in use.");
+  }
   let userID = generateRandomString();
   users[userID] = { id: userID, email: req.body['userEmail'], password: req.body['userPassword'] };
   res.cookie('user_id', userID);
