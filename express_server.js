@@ -53,8 +53,8 @@ function findUserID(email) {
 
 //Object to store all URLs
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "kImfn"},
+  "9sm5xK": { longURL: "http://www.google.com", userID: "kImfn"}
 };
 
 //Object to store all Users
@@ -97,7 +97,7 @@ app.get("/urls/new", (req, res) => {
 
 //Shows all short URLS
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_id: users[req.cookies['user_id']]};
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]['longURL'], user_id: users[req.cookies['user_id']]};
   res.render("urls_show", templateVars);
 });
 
@@ -115,14 +115,15 @@ app.get("/login", (req, res) =>{
 
 //Redirect to longURL
 app.get("/u/:shortURL", (req, res) => {
-  res.redirect(urlDatabase[req.params.shortURL]);
+  res.redirect(urlDatabase[req.params.shortURL]['longURL']);
 });
 
 //-----POST-----
 //Creates new shortURL and adds to database
 app.post("/urls", (req, res) => {
   let randomString = generateRandomString();
-  urlDatabase[randomString] = req.body['longURL'];
+  urlDatabase[randomString] = { longURL: req.body['longURL'], userID: req.cookies['user_id'] };
+  console.log(urlDatabase);
   res.redirect(`/urls/${randomString}`);
 });
 
