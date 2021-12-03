@@ -34,9 +34,9 @@ function checkEmail(email) {
 }
 
 //Check user credentials
-function checkPassword(email, password) {
+function checkPassword(password) {
   for (let user in users) {
-    if (users[user]["password"] !== password) {
+    if (users[user]["password"] === password) {
       return true;
     }
   }
@@ -44,16 +44,15 @@ function checkPassword(email, password) {
 
 //Check email
 function findUserID(email) {
-  for (let user in users) {
-    if (users[user]['email'] = email) {
-      return user;
+  for (let userID in users) {
+    if (users[userID]['email'] === email) {
+      return userID;
     }
   }
 }
 
 //Check for all shortURLs created by a user
 function urlsForUser(id) {
-
   let urlsOfUser = {};
 
   for (let url in urlDatabase) {
@@ -141,13 +140,19 @@ app.post("/urls", (req, res) => {
 });
 
 //Delete URL from Database
-app.post("/urls/:shortURL", (req, res) => {
+app.post("/urls/:shortURL/delete", (req, res) => {
+  if (urlDatabase[req.params.shortURL]['userID'] !== req.cookies['user_id']) {
+    return res.status(403).send('User not authorized to do this.');
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
 //Edit longURL in Database
 app.post("/urls/:shortURL/edit", (req, res) => {
+  if (urlDatabase[req.params.shortURL]['userID'] !== req.cookies['user_id']) {
+    return res.status(403).send('User not authorized to do this.');
+  }
   urlDatabase[req.params.shortURL] = req.body['newURL'];
   res.redirect("/urls");
 });
@@ -162,12 +167,10 @@ app.post("/login", (req, res) => {
     return res.status(403).send('Email is not in the database');
   }
 
-  if (checkPassword(req.body['userEmail'], req.body['userPassword'])) {
+  if (!(checkPassword(req.body['userPassword']))) {
     return res.status(403).send('Password does not match');
   }
-
   let userID = findUserID(req.body['userEmail']);
-
   res.cookie('user_id', userID);
   res.redirect("/urls");
 });
