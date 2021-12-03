@@ -87,6 +87,10 @@ app.get("/urls", (req, res) => {
 
 //Shows form to create new URL
 app.get("/urls/new", (req, res) => {
+  //Check to see if user logged in or not
+  if (!req.cookies['user_id']) {
+    res.redirect(403, "/urls");
+  }
   const templateVars = { user_id: users[req.cookies['user_id']] };
   res.render("urls_new", templateVars);
 });
