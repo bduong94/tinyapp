@@ -34,6 +34,8 @@ function findUserID(email, database) {
       return userID;
     }
   }
+
+  return undefined;
 }
 
 //Check for all shortURLs created by a user
