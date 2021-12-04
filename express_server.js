@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 const app = express();
 app.use(cookieParser());
 const PORT = 8080;
@@ -31,15 +32,6 @@ function checkEmail(email) {
   }
 
   return false;
-}
-
-//Check user credentials
-function checkPassword(password) {
-  for (let user in users) {
-    if (users[user]["password"] === password) {
-      return true;
-    }
-  }
 }
 
 //Check email
@@ -75,7 +67,7 @@ const users = {
   "kImfn": {
     id: "kImfn",
     email: "brian@test.test",
-    password: "test123"
+    password: bcrypt.hashSync('test123', 10)
   }
 };
 
@@ -166,11 +158,13 @@ app.post("/login", (req, res) => {
   if (!checkEmail(req.body['userEmail'])) {
     return res.status(403).send('Email is not in the database');
   }
+  
+  let userID = findUserID(req.body['userEmail']);
 
-  if (!(checkPassword(req.body['userPassword']))) {
+  if (!bcrypt.compareSync(req.body['userPassword'], users[userID]['password'])) {
     return res.status(403).send('Password does not match');
   }
-  let userID = findUserID(req.body['userEmail']);
+
   res.cookie('user_id', userID);
   res.redirect("/urls");
 });
@@ -191,7 +185,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Sorry, that email is already in use.");
   }
   let userID = generateRandomString();
-  users[userID] = { id: userID, email: req.body['userEmail'], password: req.body['userPassword'] };
+  users[userID] = { id: userID, email: req.body['userEmail'], password: bcrypt.hashSync(req.body['userPassword'], 10) };
   res.cookie('user_id', userID);
   res.redirect("/urls");
 });
