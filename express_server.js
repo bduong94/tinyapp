@@ -2,62 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const { generateRandomString, checkEmail, findUserID, urlsForUser } = require('./helpers');
 const app = express();
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
 const PORT = 8080;
-let urlLength = 6;
-
-//Create shortURL string
-function generateRandomString() {
-  let result = "";
-  let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-  
-  for (let i = 0; i < urlLength; i++) {
-    result += characters[Math.floor(characters.length * Math.random())];
-  }
-
-  if (urlDatabase[result]) {
-    generateRandomString();
-  }
-
-  return result;
-}
-
-//Check email
-function checkEmail(email) {
-  for (let user in users) {
-    if (users[user]['email'] === email) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-//Check email
-function findUserID(email) {
-  for (let userID in users) {
-    if (users[userID]['email'] === email) {
-      return userID;
-    }
-  }
-}
-
-//Check for all shortURLs created by a user
-function urlsForUser(id) {
-  let urlsOfUser = {};
-
-  for (let url in urlDatabase) {
-    if (urlDatabase[url]['userID'] === id) {
-      urlsOfUser[url] = urlDatabase[url];
-    }
-  }
-
-  return urlsOfUser;
-}
 
 //Object to store all URLs
 const urlDatabase = {
@@ -89,7 +40,7 @@ app.get("/", (req, res) => res.redirect(`/urls`));
 
 //Shows all URL's for the user
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlsForUser(req.session.user_id), user_id: users[req.session.user_id] };
+  const templateVars = { urls: urlsForUser(req.session.user_id, urlDatabase), user_id: users[req.session.user_id] };
   res.render("urls_index", templateVars);
 });
 
@@ -129,7 +80,7 @@ app.get("/u/:shortURL", (req, res) => {
 //-----POST-----
 //Creates new shortURL and adds to database
 app.post("/urls", (req, res) => {
-  let randomString = generateRandomString();
+  let randomString = generateRandomString(urlDatabase);
   urlDatabase[randomString] = { longURL: req.body['longURL'], userID: req.session.user_id };
   res.redirect(`/urls/${randomString}`);
 });
@@ -158,11 +109,11 @@ app.post("/login", (req, res) => {
     return res.status(400).send("Sorry, email or password cannot be empty!");
   }
 
-  if (!checkEmail(req.body['userEmail'])) {
+  if (!checkEmail(req.body['userEmail'], users)) {
     return res.status(403).send('Email is not in the database');
   }
   
-  let userID = findUserID(req.body['userEmail']);
+  let userID = findUserID(req.body['userEmail'], users);
 
   if (!bcrypt.compareSync(req.body['userPassword'], users[userID]['password'])) {
     return res.status(403).send('Password does not match');
@@ -184,10 +135,10 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Sorry, email or password cannot be empty!");
   }
 
-  if (checkEmail(req.body['userEmail'])) {
+  if (checkEmail(req.body['userEmail'], users)) {
     return res.status(400).send("Sorry, that email is already in use.");
   }
-  let userID = generateRandomString();
+  let userID = generateRandomString(users);
   users[userID] = { id: userID, email: req.body['userEmail'], password: bcrypt.hashSync(req.body['userPassword'], 10) };
   req.session.user_id = userID;
   res.redirect("/urls");
