@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const { generateRandomString, checkEmail, findUserID, urlsForUser } = require('./helpers');
+const { generateRandomString, checkEmail, findUserID, urlsForUser, checkValidUser } = require('./helpers');
 const app = express();
 app.use(cookieSession({
   name: 'session',
@@ -87,19 +87,27 @@ app.post("/urls", (req, res) => {
 
 //Delete URL from Database
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if (urlDatabase[req.params.shortURL]['userID'] !== req.session.user_id) {
+  
+  let validUser = checkValidUser(req.session.user_id, req.params.shortURL, urlDatabase);
+
+  if (!validUser) {
     return res.status(403).send('User not authorized to do this.');
   }
+  
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
 //Edit longURL in Database
 app.post("/urls/:shortURL/edit", (req, res) => {
-  if (urlDatabase[req.params.shortURL]['userID'] !== req.session.user_id) {
+
+  let validUser = checkValidUser(req.session.user_id, req.params.shortURL, urlDatabase);
+
+  if (!validUser) {
     return res.status(403).send('User not authorized to do this.');
   }
-  urlDatabase[req.params.shortURL] = req.body['newURL'];
+
+  urlDatabase[req.params.shortURL]['longURL'] = req.body['newURL'];
   res.redirect("/urls");
 });
 

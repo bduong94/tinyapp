@@ -1,3 +1,5 @@
+const e = require("express");
+
 let urlLength = 6;
 
 //Create shortURL string
@@ -51,4 +53,13 @@ function urlsForUser(id, database) {
   return urlsOfUser;
 }
 
-module.exports = { generateRandomString, checkEmail, findUserID, urlsForUser };
+//Checks if user is valid
+function checkValidUser(id, shortURL, database) {
+  if (database[shortURL]['userID'] === id){
+    return true;
+  }
+  
+  return false;
+}
+
+module.exports = { generateRandomString, checkEmail, findUserID, urlsForUser, checkValidUser };
