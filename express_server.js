@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const { generateRandomString, checkEmail, findUserID, urlsForUser, checkValidUser } = require('./helpers');
+const { generateRandomString, findEmailInDatabase, findUserID, urlsForUser, checkValidUser } = require('./helpers');
 const app = express();
 app.use(cookieSession({
   name: 'session',
@@ -98,7 +98,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-//Edit longURL in Database
+//Edit longURL in urlDatabase
 app.post("/urls/:shortURL/edit", (req, res) => {
 
   let validUser = checkValidUser(req.session.user_id, req.params.shortURL, urlDatabase);
@@ -117,7 +117,9 @@ app.post("/login", (req, res) => {
     return res.status(400).send("Sorry, email or password cannot be empty!");
   }
 
-  if (!checkEmail(req.body['userEmail'], users)) {
+  let validEmail = findEmailInDatabase(req.body['userEmail'], users)
+
+  if (!validEmail) {
     return res.status(403).send('Email is not in the database');
   }
   
@@ -143,7 +145,9 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Sorry, email or password cannot be empty!");
   }
 
-  if (checkEmail(req.body['userEmail'], users)) {
+  let validEmail = findEmailInDatabase(req.body['userEmail'], users)
+
+  if (validEmail) {
     return res.status(400).send("Sorry, that email is already in use.");
   }
   let userID = generateRandomString(users);

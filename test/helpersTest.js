@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { checkEmail, findUserID } = require('../helpers');
+const { findEmailInDatabase, findUserID } = require('../helpers');
 
 const testUsers = {
   "userRandomID": {
@@ -29,26 +29,14 @@ describe('Tests for findUserID', () => {
   });
 });
 
-describe('Tests for checkEmail', () => {
+describe('Tests for findEmailInDatabase', () => {
   it('Should return true if email is in database', () => {
-    const email = checkEmail("test@test.com", testUsers);
+    const email = findEmailInDatabase("test@test.com", testUsers);
     assert.isTrue(email);
   });
 
   it('Should return a false if email is not in database', () => {
-    const email = checkEmail("testss@test.com", testUsers);
-    assert.isFalse(email);
-  });
-});
-
-describe('Tests for checkEmail', () => {
-  it('Should return true if email is in database', () => {
-    const email = checkEmail("test@test.com", testUsers);
-    assert.isTrue(email);
-  });
-
-  it('Should return a false if email is not in database', () => {
-    const email = checkEmail("testss@test.com", testUsers);
+    const email = findEmailInDatabase("testss@test.com", testUsers);
     assert.isFalse(email);
   });
 });

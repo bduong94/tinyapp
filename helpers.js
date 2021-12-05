@@ -19,7 +19,7 @@ function generateRandomString(database) {
 }
 
 //Check email
-function checkEmail(email, database) {
+function findEmailInDatabase(email, database) {
   for (let user in database) {
     if (database[user]['email'] === email) {
       return true;
@@ -62,4 +62,4 @@ function checkValidUser(id, shortURL, database) {
   return false;
 }
 
-module.exports = { generateRandomString, checkEmail, findUserID, urlsForUser, checkValidUser };
+module.exports = { generateRandomString, findEmailInDatabase, findUserID, urlsForUser, checkValidUser };
